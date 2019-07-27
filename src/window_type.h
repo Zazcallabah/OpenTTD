@@ -12,6 +12,8 @@
 #ifndef WINDOW_TYPE_H
 #define WINDOW_TYPE_H
 
+#include "transport_type.h"
+
 /** %Window numbers. */
 enum WindowNumberEnum {
 	WN_GAME_OPTIONS_AI = 0,          ///< AI settings.
@@ -33,6 +35,8 @@ enum WindowNumberEnum {
 
 	WN_NETWORK_STATUS_WINDOW_JOIN = 0,         ///< Network join status.
 	WN_NETWORK_STATUS_WINDOW_CONTENT_DOWNLOAD, ///< Network content download status.
+
+	WN_CLIPBOARD_TOOLBAR = TRANSPORT_END, ///< Clipboard toolbar.
 };
 
 /** %Window classes. */
@@ -64,6 +68,7 @@ enum WindowClass {
 	 *   - #TRANSPORT_AIR = #AirportToolbarWidgets
 	 *   - #TRANSPORT_WATER = #DockToolbarWidgets
 	 *   - #TRANSPORT_ROAD = #RoadToolbarWidgets
+	 *   - #WN_CLIPBOARD_TOOLBAR = #ClipboardToolbarWidgets
 	 */
 	WC_BUILD_TOOLBAR,
 
@@ -71,6 +76,7 @@ enum WindowClass {
 	 * Scenario build toolbar; %Window numbers:
 	 *   - #TRANSPORT_WATER = #DockToolbarWidgets
 	 *   - #TRANSPORT_ROAD = #RoadToolbarWidgets
+	 *   - #WN_CLIPBOARD_TOOLBAR = #ClipboardToolbarWidgets
 	 */
 	WC_SCEN_BUILD_TOOLBAR,
 

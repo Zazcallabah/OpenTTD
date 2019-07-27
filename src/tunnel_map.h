@@ -21,10 +21,11 @@
  * @pre IsTileType(t, MP_TUNNELBRIDGE)
  * @return true if and only if this tile is a tunnel (entrance)
  */
-static inline bool IsTunnel(TileIndex t)
+template <typename Tindex>
+static inline bool IsTunnel(const Tindex &t)
 {
 	assert(IsTileType(t, MP_TUNNELBRIDGE));
-	return !HasBit(_m[t].m5, 7);
+	return !HasBit(GetTile(t)->m5, 7);
 }
 
 /**
@@ -32,12 +33,15 @@ static inline bool IsTunnel(TileIndex t)
  * @param t the tile that might be a tunnel
  * @return true if and only if this tile is a tunnel (entrance)
  */
-static inline bool IsTunnelTile(TileIndex t)
+template <typename Tindex>
+static inline bool IsTunnelTile(const Tindex &t)
 {
 	return IsTileType(t, MP_TUNNELBRIDGE) && IsTunnel(t);
 }
 
-TileIndex GetOtherTunnelEnd(TileIndex);
+TileIndex GetOtherTunnelEnd(TileIndex t);
+GenericTileIndex GetOtherTunnelEnd(GenericTileIndex t);
+
 bool IsTunnelInWay(TileIndex, int z);
 bool IsTunnelInWayDir(TileIndex tile, int z, DiagDirection dir);
 
@@ -48,16 +52,17 @@ bool IsTunnelInWayDir(TileIndex tile, int z, DiagDirection dir);
  * @param d the direction facing out of the tunnel
  * @param r the road type used in the tunnel
  */
-static inline void MakeRoadTunnel(TileIndex t, Owner o, DiagDirection d, RoadTypes r)
+template <typename Tindex>
+static inline void MakeRoadTunnel(const Tindex &t, Owner o, DiagDirection d, RoadTypes r)
 {
 	SetTileType(t, MP_TUNNELBRIDGE);
 	SetTileOwner(t, o);
-	_m[t].m2 = 0;
-	_m[t].m3 = 0;
-	_m[t].m4 = 0;
-	_m[t].m5 = TRANSPORT_ROAD << 2 | d;
-	SB(_me[t].m6, 2, 4, 0);
-	_me[t].m7 = 0;
+	GetTile(t)->m2 = 0;
+	GetTile(t)->m3 = 0;
+	GetTile(t)->m4 = 0;
+	GetTile(t)->m5 = TRANSPORT_ROAD << 2 | d;
+	SB(GetTileEx(t)->m6, 2, 4, 0);
+	GetTileEx(t)->m7 = 0;
 	SetRoadOwner(t, ROADTYPE_ROAD, o);
 	if (o != OWNER_TOWN) SetRoadOwner(t, ROADTYPE_TRAM, o);
 	SetRoadTypes(t, r);
@@ -70,16 +75,17 @@ static inline void MakeRoadTunnel(TileIndex t, Owner o, DiagDirection d, RoadTyp
  * @param d the direction facing out of the tunnel
  * @param r the rail type used in the tunnel
  */
-static inline void MakeRailTunnel(TileIndex t, Owner o, DiagDirection d, RailType r)
+template <typename Tindex>
+static inline void MakeRailTunnel(const Tindex &t, Owner o, DiagDirection d, RailType r)
 {
 	SetTileType(t, MP_TUNNELBRIDGE);
 	SetTileOwner(t, o);
-	_m[t].m2 = 0;
-	_m[t].m3 = r;
-	_m[t].m4 = 0;
-	_m[t].m5 = TRANSPORT_RAIL << 2 | d;
-	SB(_me[t].m6, 2, 4, 0);
-	_me[t].m7 = 0;
+	GetTile(t)->m2 = 0;
+	GetTile(t)->m3 = r;
+	GetTile(t)->m4 = 0;
+	GetTile(t)->m5 = TRANSPORT_RAIL << 2 | d;
+	SB(GetTileEx(t)->m6, 2, 4, 0);
+	GetTileEx(t)->m7 = 0;
 }
 
 #endif /* TUNNEL_MAP_H */

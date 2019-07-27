@@ -26,12 +26,12 @@
  *
  * @param tile The tile to get the height from
  * @return the height of the tile
- * @pre tile < MapSize()
+ * @pre IsValidTileIndex(tile)
  */
-static inline uint TileHeight(TileIndex tile)
+template <typename Tindex>
+static inline uint TileHeight(const Tindex &tile)
 {
-	assert(tile < MapSize());
-	return _m[tile].height;
+	return GetTile(tile)->height;
 }
 
 uint TileHeightOutsideMap(int x, int y);
@@ -43,14 +43,14 @@ uint TileHeightOutsideMap(int x, int y);
  *
  * @param tile The tile to change the height
  * @param height The new height value of the tile
- * @pre tile < MapSize()
+ * @pre IsValidTileIndex(tile)
  * @pre heigth <= MAX_TILE_HEIGHT
  */
-static inline void SetTileHeight(TileIndex tile, uint height)
+template <typename Tindex>
+static inline void SetTileHeight(const Tindex &tile, uint height)
 {
-	assert(tile < MapSize());
 	assert(height <= MAX_TILE_HEIGHT);
-	_m[tile].height = height;
+	GetTile(tile)->height = height;
 }
 
 /**
@@ -61,7 +61,8 @@ static inline void SetTileHeight(TileIndex tile, uint height)
  * @param tile The tile to get the height
  * @return The height of the tile in pixel
  */
-static inline uint TilePixelHeight(TileIndex tile)
+template <typename Tindex>
+static inline uint TilePixelHeight(const Tindex &tile)
 {
 	return TileHeight(tile) * TILE_HEIGHT;
 }
@@ -84,12 +85,12 @@ static inline uint TilePixelHeightOutsideMap(int x, int y)
  *
  * @param tile The tile to get the TileType
  * @return The tiletype of the tile
- * @pre tile < MapSize()
+ * @pre IsValidTileIndex(tile)
  */
-static inline TileType GetTileType(TileIndex tile)
+template <typename Tindex>
+static inline TileType GetTileType(const Tindex &tile)
 {
-	assert(tile < MapSize());
-	return (TileType)GB(_m[tile].type, 4, 4);
+	return (TileType)GB(GetTile(tile)->type, 4, 4);
 }
 
 /**
@@ -97,16 +98,18 @@ static inline TileType GetTileType(TileIndex tile)
  *
  * @param tile The tile to check
  * @return Whether the tile is in the interior of the map
- * @pre tile < MapSize()
+ * @pre IsValidTileIndex(tile)
  */
-static inline bool IsInnerTile(TileIndex tile)
+template <typename Tindex>
+static inline bool IsInnerTile(const Tindex &tile)
 {
-	assert(tile < MapSize());
+	assert(IsValidTileIndex(tile));
 
 	uint x = TileX(tile);
 	uint y = TileY(tile);
 
-	return x < MapMaxX() && y < MapMaxY() && ((x > 0 && y > 0) || !_settings_game.construction.freeform_edges);
+	return x < MapMaxX(MapOf(tile)) && y < MapMaxY(MapOf(tile)) &&
+			((x > 0 && y > 0) || !IsMainMapTile(tile) || !_settings_game.construction.freeform_edges);
 }
 
 /**
@@ -118,17 +121,17 @@ static inline bool IsInnerTile(TileIndex tile)
  *
  * @param tile The tile to save the new type
  * @param type The type to save
- * @pre tile < MapSize()
+ * @pre IsValidTileIndex(tile)
  * @pre type MP_VOID <=> tile is on the south-east or south-west edge.
  */
-static inline void SetTileType(TileIndex tile, TileType type)
+template <typename Tindex>
+static inline void SetTileType(const Tindex &tile, TileType type)
 {
-	assert(tile < MapSize());
 	/* VOID tiles (and no others) are exactly allowed at the lower left and right
 	 * edges of the map. If _settings_game.construction.freeform_edges is true,
 	 * the upper edges of the map are also VOID tiles. */
 	assert(IsInnerTile(tile) == (type != MP_VOID));
-	SB(_m[tile].type, 4, 4, type);
+	SB(GetTile(tile)->type, 4, 4, type);
 }
 
 /**
@@ -140,7 +143,8 @@ static inline void SetTileType(TileIndex tile, TileType type)
  * @param type The type to check against
  * @return true If the type matches against the type of the tile
  */
-static inline bool IsTileType(TileIndex tile, TileType type)
+template <typename Tindex>
+static inline bool IsTileType(const Tindex &tile, TileType type)
 {
 	return GetTileType(tile) == type;
 }
@@ -151,9 +155,10 @@ static inline bool IsTileType(TileIndex tile, TileType type)
  * @param tile The tile to check
  * @return True if the tile is on the map and not one of MP_VOID.
  */
-static inline bool IsValidTile(TileIndex tile)
+template <typename Tindex>
+static inline bool IsValidTile(const Tindex &tile)
 {
-	return tile < MapSize() && !IsTileType(tile, MP_VOID);
+	return IsValidTileIndex(tile) && !IsTileType(tile, MP_VOID);
 }
 
 /**
@@ -168,13 +173,14 @@ static inline bool IsValidTile(TileIndex tile)
  * @pre IsValidTile(tile)
  * @pre The type of the tile must not be MP_HOUSE and MP_INDUSTRY
  */
-static inline Owner GetTileOwner(TileIndex tile)
+template <typename Tindex>
+static inline Owner GetTileOwner(const Tindex &tile)
 {
 	assert(IsValidTile(tile));
 	assert(!IsTileType(tile, MP_HOUSE));
 	assert(!IsTileType(tile, MP_INDUSTRY));
 
-	return (Owner)GB(_m[tile].m1, 0, 5);
+	return (Owner)GB(GetTile(tile)->m1, 0, 5);
 }
 
 /**
@@ -188,13 +194,14 @@ static inline Owner GetTileOwner(TileIndex tile)
  * @pre IsValidTile(tile)
  * @pre The type of the tile must not be MP_HOUSE and MP_INDUSTRY
  */
-static inline void SetTileOwner(TileIndex tile, Owner owner)
+template <typename Tindex>
+static inline void SetTileOwner(const Tindex &tile, Owner owner)
 {
 	assert(IsValidTile(tile));
 	assert(!IsTileType(tile, MP_HOUSE));
 	assert(!IsTileType(tile, MP_INDUSTRY));
 
-	SB(_m[tile].m1, 0, 5, owner);
+	SB(GetTile(tile)->m1, 0, 5, owner);
 }
 
 /**
@@ -204,7 +211,8 @@ static inline void SetTileOwner(TileIndex tile, Owner owner)
  * @param owner The owner to check against
  * @return True if a tile belongs the the given owner
  */
-static inline bool IsTileOwner(TileIndex tile, Owner owner)
+template <typename Tindex>
+static inline bool IsTileOwner(const Tindex &tile, Owner owner)
 {
 	return GetTileOwner(tile) == owner;
 }
@@ -213,25 +221,25 @@ static inline bool IsTileOwner(TileIndex tile, Owner owner)
  * Set the tropic zone
  * @param tile the tile to set the zone of
  * @param type the new type
- * @pre tile < MapSize()
+ * @pre IsValidTileIndex(tile)
  */
-static inline void SetTropicZone(TileIndex tile, TropicZone type)
+template <typename Tindex>
+static inline void SetTropicZone(const Tindex &tile, TropicZone type)
 {
-	assert(tile < MapSize());
 	assert(!IsTileType(tile, MP_VOID) || type == TROPICZONE_NORMAL);
-	SB(_m[tile].type, 0, 2, type);
+	SB(GetTile(tile)->type, 0, 2, type);
 }
 
 /**
  * Get the tropic zone
  * @param tile the tile to get the zone of
- * @pre tile < MapSize()
+ * @pre IsValidTileIndex(tile)
  * @return the zone type
  */
-static inline TropicZone GetTropicZone(TileIndex tile)
+template <typename Tindex>
+static inline TropicZone GetTropicZone(const Tindex &tile)
 {
-	assert(tile < MapSize());
-	return (TropicZone)GB(_m[tile].type, 0, 2);
+	return (TropicZone)GB(GetTile(tile)->type, 0, 2);
 }
 
 /**
@@ -243,7 +251,7 @@ static inline TropicZone GetTropicZone(TileIndex tile)
 static inline byte GetAnimationFrame(TileIndex t)
 {
 	assert(IsTileType(t, MP_HOUSE) || IsTileType(t, MP_OBJECT) || IsTileType(t, MP_INDUSTRY) ||IsTileType(t, MP_STATION));
-	return _me[t].m7;
+	return GetTileEx(t)->m7;
 }
 
 /**
@@ -255,12 +263,17 @@ static inline byte GetAnimationFrame(TileIndex t)
 static inline void SetAnimationFrame(TileIndex t, byte frame)
 {
 	assert(IsTileType(t, MP_HOUSE) || IsTileType(t, MP_OBJECT) || IsTileType(t, MP_INDUSTRY) ||IsTileType(t, MP_STATION));
-	_me[t].m7 = frame;
+	GetTileEx(t)->m7 = frame;
 }
 
 Slope GetTileSlope(TileIndex tile, int *h = NULL);
+Slope GetTileSlope(GenericTileIndex tile, int *h = NULL);
+
 int GetTileZ(TileIndex tile);
+int GetTileZ(GenericTileIndex tile);
+
 int GetTileMaxZ(TileIndex tile);
+int GetTileMaxZ(GenericTileIndex tile);
 
 bool IsTileFlat(TileIndex tile, int *h = NULL);
 
@@ -270,7 +283,8 @@ bool IsTileFlat(TileIndex tile, int *h = NULL);
  * @param h    If not \c NULL, pointer to storage of z height
  * @return Slope of the tile, except for the HALFTILE part
  */
-static inline Slope GetTilePixelSlope(TileIndex tile, int *h)
+template <typename Tindex>
+static inline Slope GetTilePixelSlope(const Tindex &tile, int *h)
 {
 	Slope s = GetTileSlope(tile, h);
 	if (h != NULL) *h *= TILE_HEIGHT;
@@ -284,7 +298,8 @@ Slope GetTilePixelSlopeOutsideMap(int x, int y, int *h);
  * @param tile Tile to compute height of
  * @return Minimum height of the tile
  */
-static inline int GetTilePixelZ(TileIndex tile)
+template <typename Tindex>
+static inline int GetTilePixelZ(const Tindex &tile)
 {
 	return GetTileZ(tile) * TILE_HEIGHT;
 }
@@ -296,7 +311,8 @@ int GetTilePixelZOutsideMap(int x, int y);
  * @param t Tile to compute height of
  * @return Maximum height of the tile
  */
-static inline int GetTileMaxPixelZ(TileIndex tile)
+template <typename Tindex>
+static inline int GetTileMaxPixelZ(const Tindex &tile)
 {
 	return GetTileMaxZ(tile) * TILE_HEIGHT;
 }

@@ -50,6 +50,7 @@ void InitializeCompanies();
 void InitializeCheats();
 void InitializeNPF();
 void InitializeOldNames();
+void InitializeClipboard();
 
 void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settings)
 {
@@ -93,6 +94,7 @@ void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settin
 	InitializeIndustries();
 	InitializeObjects();
 	InitializeBuildingCounts();
+	InitializeClipboard();
 
 	InitializeNPF();
 
